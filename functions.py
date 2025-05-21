@@ -110,11 +110,22 @@ def update_categorical_summary(series, col_summary):
 
 
 def update_datetime_summary(date_series, col_summary):
-    # Get Date Range
-    min_date = date_series.min()
-    max_date = date_series.max()
-    if pd.notna(min_date) and pd.notna(max_date):
-        col_summary['Date Range'] = f"{min_date.date()} to {max_date.date()}"
+    # Extract Date and Time Separately
+    dates = date_series.dt.date
+    times = date_series.dt.time
+
+    unique_dates = dates.unique()
+
+    # If No Date, return Time Range
+    if len(unique_dates) == 1 and unique_dates[0] == pd.Timestamp.today().date():
+        min_time = min(times)
+        max_time = max(times)
+        col_summary['Time Range'] = f"{min_time} to {max_time}"
+    # Else, return Day Range
+    else:
+        min_date = min(dates)
+        max_date = max(dates)
+        col_summary['Date Range'] = f"{min_date} to {max_date}"
 
 
 def plot_distribution(series, col_summary, num_unique):
@@ -192,7 +203,7 @@ def get_column_summary(df, col):
 
         # If Numerical values are more than threshold, recommend to parse to Numerical
         if not pd.api.types.is_numeric_dtype(series):
-            col_summary['Recommendation'] = f'Convert to Numeric Variable({numeric_percentage}% can be converted)'
+            col_summary['Recommendation'] = f'Convert to Numeric Variable ({numeric_percentage}% can be converted)'
 
     # If Categorical Column or should be Parsed to Categorical Column, get Categorical Summary
     if series.dtype == 'object' and num_unique <= CATEGORY_THRESHOLD:
