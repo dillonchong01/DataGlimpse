@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Data Preview</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main>
+        <h1>Data Preview</h1>
+        <div class="nav-overlap-container">
+            <a href="/" class="back-link">&larr; Upload New Dataset</a>
+
+            <div class="pagination" role="navigation" aria-label="Pagination Navigation">
+                <a href="{{ url_for('view_data', page=1) }}" 
+                class="{{ 'active' if page == 1 else '' }}" 
+                {% if page == 1 %}aria-current="page"{% endif %}>
+                    1
+                </a>
+
+                {% if page > 3 %}
+                    ...
+                {% endif %}
+
+                {% for p in range(page-1, page+2) %}
+                    {% if 1 < p < total_pages %}
+                        <a href="{{ url_for('view_data', page=p) }}" 
+                        class="{{ 'active' if p == page else '' }}" 
+                        {% if p == page %}aria-current="page"{% endif %}>
+                            {{ p }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page < total_pages - 2 %}
+                    ...
+                {% endif %}
+
+                {% if total_pages > 1 %}
+                    <a href="{{ url_for('view_data', page=total_pages) }}" 
+                    class="{{ 'active' if page == total_pages else '' }}" 
+                    {% if page == total_pages %}aria-current="page"{% endif %}>
+                    {{ total_pages }}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <tr>
+                    {% for col in columns %}
+                        <th scope="col">
+                            <a href="{{ url_for('column_summary', column=col) }}">{{ col }}</a>
+                        </th>
+                    {% endfor %}
+                </tr>
+                {% for row in page_data %}
+                    <tr>
+                        {% for col in columns %}
+                            <td>{{ row[col] }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </main>
+</body>
+</html>
