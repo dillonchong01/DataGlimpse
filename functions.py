@@ -220,6 +220,7 @@ def get_column_summary(df, col):
         update_datetime_summary(date_series, col_summary)
 
         # Recommend to parse to DateTime
+        col_summary.pop('Recommendation', None)
         col_summary['Recommendation'] = f'Convert to DateTime Variable ({date_percentage}% can be converted)'
 
     return col_summary
