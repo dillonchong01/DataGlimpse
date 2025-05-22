@@ -168,7 +168,7 @@ def get_column_summary(df, col):
     series = df[col]
 
     # Thresholds for Conversion
-    CATEGORY_THRESHOLD = min(100, len(series) / 100)
+    CATEGORY_THRESHOLD = 0.1
     NUMERIC_THRESHOLD = 95
     DATETIME_THRESHOLD = 95
 
@@ -206,7 +206,7 @@ def get_column_summary(df, col):
             col_summary['Recommendation'] = f'Convert to Numeric Variable ({numeric_percentage}% can be converted)'
 
     # If Categorical Column or should be Parsed to Categorical Column, get Categorical Summary
-    if series.dtype == 'object' and num_unique <= CATEGORY_THRESHOLD:
+    if series.dtype in ['object', 'category'] and num_unique/len(series) <= CATEGORY_THRESHOLD:
         update_categorical_summary(series, col_summary)
 
         # Recommend to parse to Categorical

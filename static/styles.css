@@ -125,41 +125,64 @@ tr:hover td {
     padding: 0.5em 0;
 }
 
-.pagination {
+.nav-overlap-container .edit-link {
+    position: absolute;
+    bottom: 0;
     right: 0;
+    padding: 0.5em 0;
+}
+
+.pagination {
     display: flex;
-    gap: 0.5em;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    gap: 0.5em;
+    padding: 1rem 0;
+    flex-wrap: wrap;
 }
 
 .pagination a {
-    padding: 10px 16px;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 10px;
-    background-color: #ffffff;
-    color: #475569;
+    padding: 0.6em 1.1em;
+    border-radius: 0.75rem;
+    background: linear-gradient(to right, #f1f5f9, #e2e8f0);
+    color: #334155;
+    font-size: 0.95rem;
+    font-weight: 500;
     text-decoration: none;
-    font-size: 1rem;
-    font-weight: 600;
-    box-shadow: 0 1px 4px rgba(203, 213, 225, 0.6);
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    position: relative;
 }
 
 .pagination a:hover {
-    background-color: #e0e7ff;
-    color: #4338ca;
-    border-color: #4338ca;
-    box-shadow: 0 4px 10px rgba(67, 56, 202, 0.3);
+    background: linear-gradient(to right, #dbeafe, #c7d2fe);
+    color: #1e3a8a;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    border-color: #93c5fd;
 }
 
 .pagination a.active {
-    background-color: #4f46e5;
-    color: white;
+    background: linear-gradient(to right, #6366f1, #4338ca);
+    color: #fff;
     font-weight: 700;
-    border-color: #4f46e5;
-    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+    transform: scale(1.05);
+}
+
+.pagination a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 0 rgba(59, 130, 246, 0);
+    transition: box-shadow 0.3s ease;
+}
+
+.pagination a:hover::after {
+    box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 /* Links (e.g., Column Summary) */
@@ -176,4 +199,77 @@ a:hover {
     text-decoration: underline;
     color: #3730a3;
     cursor: pointer;
+}
+
+.edit-form {
+    max-width: 100%;
+    background: #ffffff;
+    padding: 2em;
+    margin: 0 auto 2em;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
+}
+
+.edit-form table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.edit-form th,
+.edit-form td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.85rem;
+}
+
+.edit-form th {
+    background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.edit-form td {
+    background-color: #ffffff;
+    color: #374151;
+}
+
+.edit-form input[type="text"],
+.edit-form select {
+    width: 80%;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    color: #1f2937;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edit-form input[type="text"]:focus,
+.edit-form select:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    outline: none;
+}
+
+/* Checkbox styling (keeps it clean but consistent) */
+.edit-form input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Form submission button alignment */
+.edit-form .form-actions {
+    margin-top: 1.5em;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
 }

@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import math
 import os
 from flask_caching import Cache
-from functions import read_data, get_column_summary
+from summary_functions import read_data, get_column_summary
+from editing_functions import apply_edits
 
 app = Flask(__name__)
 app.secret_key = 'unique'
@@ -15,6 +16,28 @@ allowed_extensions = {'.csv', '.sqlite', '.sqlite3', '.db'}
 def allowed_file(filename):
     ext = os.path.splitext(filename)[1].lower()
     return ext in allowed_extensions
+
+# Function to get Uploaded Dataframe from Cache, else read
+def get_uploaded_dataframe():
+    if 'uploaded_file' not in session:
+        return None, redirect(url_for('upload_file')), None
+    
+    filename = session.get('uploaded_file')
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    
+    if not os.path.exists(file_path):
+        return None, ("File Not Found", 404), None
+
+    # Attempt to Read Data of Uploaded File
+    df = cache.get(filename)
+    if df is None:
+        try:
+            df = read_data(file_path)
+        except Exception as e:
+            return None, (f"Error reading file: {str(e)}", 400), None
+        cache.set(filename, df, timeout=300)
+
+    return df, None, filename
 
 
 # Initialize Cache
@@ -52,22 +75,10 @@ def upload_file():
 
 @app.route('/data/page/<int:page>')
 def view_data(page=1):
-    if 'uploaded_file' not in session:
-        return redirect(url_for('upload_file'))
-    filename = session.get('uploaded_file')
-
-    file_path = os.path.join(UPLOAD_FOLDER, session['uploaded_file'])
-    if not os.path.exists(file_path):
-        return "File Not Found", 404
-
-    # Attempt to Read Data of Uploaded File
-    df = cache.get(filename)
-    if df is None:
-        try:
-            df = read_data(file_path)
-        except Exception as e:
-            return f"Error reading file: {str(e)}", 400
-        cache.set(filename, df, timeout=300)
+    # Get Dataframe from Cache
+    df, error, _ = get_uploaded_dataframe()
+    if error:
+        return error
 
     # Loads 50 Rows per Page
     page_size = 50
@@ -92,21 +103,10 @@ def view_data(page=1):
 
 @app.route('/summary/<column>')
 def column_summary(column):
-    if 'uploaded_file' not in session:
-        return redirect(url_for('upload_file'))
-
-    filename = session.get('uploaded_file')
-    file_path = os.path.join(UPLOAD_FOLDER, session['uploaded_file'])
-    if not os.path.exists(file_path):
-        return "File Not Found", 404
-
-    df = cache.get(filename)
-    if df is None:
-        try:
-            df = read_data(file_path)
-        except Exception as e:
-            return f"Error Processing File: {str(e)}", 400
-        cache.set(filename, df, timeout=300)
+    # Get Dataframe from Cache
+    df, error, _ = get_uploaded_dataframe()
+    if error:
+        return error
 
     try:
         summary = get_column_summary(df, column)
@@ -114,6 +114,21 @@ def column_summary(column):
         return f"Error Processing Summary: {str(e)}", 400
 
     return render_template('col_summary.html', column=column, summary=summary)
+
+
+@app.route('/edit', methods=['GET', 'POST'])
+def edit_data():
+    # Get Dataframe from Cache
+    df, error, filename = get_uploaded_dataframe()
+    if error:
+        return error
+    
+    if request.method == 'POST':
+        df = apply_edits(df, request.form)
+        cache.set(filename, df, timeout=300)
+        return redirect(url_for('view_data', page=1))
+
+    return render_template('edit.html', columns=list(df.columns))
 
 
 if __name__ == '__main__':

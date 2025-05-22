@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Edit DataFrame Columns</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+    <main class="edit-form">
+        <div class="header-container">
+            <h1>Edit DataFrame Columns</h1>
+            <a href="{{ url_for('view_data', page=1) }}" class="back-link">&larr; Back to Data Preview</a>
+        </div>
+
+        <form method="post" novalidate>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Rename</th>
+                        <th>Drop Column</th>
+                        <th>Drop NA / None</th>
+                        <th>Convert Datatype</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col in columns %}
+                    <tr>
+                        <td>{{ col }}</td>
+                        <td><input type="text" name="rename_{{ col }}" placeholder="New name" autocomplete="off" /></td>
+                        <td><input type="checkbox" name="dropcol_{{ col }}" /></td>
+                        <td><input type="checkbox" name="dropna_{{ col }}" /></td>
+                        <td>
+                            <select name="convert_{{ col }}">
+                                <option value="" selected>-- Select --</option>
+                                <option value="numeric">Convert to Numeric</option>
+                                <option value="datetime">Convert to Datetime</option>
+                                <option value="categorical">Convert to Categorical</option>
+                                <option value="binary">Convert to Binary</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="form-actions">
+                <button type="submit">Apply Changes</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
