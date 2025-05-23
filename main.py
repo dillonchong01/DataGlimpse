@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, send_file
 import math
 import os
+import io
 from flask_caching import Cache
-from summary_functions import read_data, get_column_summary
+from summary_functions import read_data, get_column_summary, get_dataframe_summary
 from editing_functions import apply_edits
+from plotting_functions import get_plot
 
 app = Flask(__name__)
 app.secret_key = 'unique'
@@ -107,13 +109,34 @@ def column_summary(column):
     df, error, _ = get_uploaded_dataframe()
     if error:
         return error
+    
+    # Get Previous Page
+    from_page = request.args.get('from', 'view')
 
     try:
         summary = get_column_summary(df, column)
     except Exception as e:
         return f"Error Processing Summary: {str(e)}", 400
 
-    return render_template('col_summary.html', column=column, summary=summary)
+    return render_template('summary.html', column=column, summary=summary, from_page=from_page, is_col=True)
+
+
+@app.route('/general_summary/')
+def general_summary():
+    # Get Dataframe from Cache
+    df, error, _ = get_uploaded_dataframe()
+    if error:
+        return error
+
+    # Get Previous Page
+    from_page = request.args.get('from', 'view')
+
+    try:
+        summary = get_dataframe_summary(df)
+    except Exception as e:
+        return f"Error Processing Summary: {str(e)}", 400
+
+    return render_template('summary.html', column='dataframe', summary=summary, from_page=from_page, is_col=False)
 
 
 @app.route('/edit', methods=['GET', 'POST'])
@@ -127,8 +150,55 @@ def edit_data():
         df = apply_edits(df, request.form)
         cache.set(filename, df, timeout=300)
         return redirect(url_for('view_data', page=1))
+    
+    # Get Number of Unique Values per Column
+    unique_values_map = {
+        col: df[col].dropna().nunique() for col in df.columns
+    }
+    # Get Column Datatypes
+    dtypes_map = {col: str(dtype) for col, dtype in df.dtypes.items()}
 
-    return render_template('edit.html', columns=list(df.columns))
+    return render_template('edit.html',
+                           columns=list(df.columns),
+                           unique_values_map=unique_values_map,
+                           dtypes_map=dtypes_map)
+
+
+@app.route('/eda', methods=['GET', 'POST'])
+def eda():
+    df, error, _ = get_uploaded_dataframe()
+    if error:
+        return error
+
+    columns = list(df.columns)
+
+    # Default: all plot types
+    single_var_types = ['histogram', 'boxplot', 'barchart', 'density']
+    two_var_types = ['scatter', 'line', 'heatmap']
+
+    var1 = None
+    var2 = None
+    plot_types = single_var_types + two_var_types  # default, if nothing selected yet
+
+    if request.method == 'POST':
+        var1 = request.form.get('var1')
+        var2 = request.form.get('var2')
+        # Adjust plot types based on selection
+        if var2 and var2.strip():
+            plot_types = two_var_types
+        else:
+            plot_types = single_var_types
+
+        plot_type = request.form.get('plot_type')
+
+        if var1 and plot_type:
+            fig = get_plot(df, var1, plot_type, var2)
+            img = io.BytesIO()
+            fig.savefig(img, format='png')
+            img.seek(0)
+            return send_file(img, mimetype='image/png')
+
+    return render_template('eda.html', columns=columns, plot_types=plot_types, var1=var1, var2=var2)
 
 
 if __name__ == '__main__':

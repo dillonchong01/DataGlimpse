@@ -8,7 +8,7 @@
 <body>
     <main class = "edit-form">
         <div class="container">
-            <h1>Data Preview</h1>
+            <h1><a href="{{ url_for('general_summary') }}" class="header-link">Data Preview</a></h1>
 
             <div class="nav-overlap-container">
                 <a href="/" class="back-link">&larr; Upload New Dataset</a>
@@ -56,7 +56,7 @@
                         <tr>
                             {% for col in columns %}
                                 <th scope="col">
-                                    <a href="{{ url_for('column_summary', column=col) }}">{{ col }}</a>
+                                    <a href="{{ url_for('column_summary', column=col, from='view') }}">{{ col }}</a>
                                 </th>
                             {% endfor %}
                         </tr>

@@ -1,0 +1,17 @@
+Coerce to Numeric, if 20-80% can be coerced (excluding NA) while the rest are strings
+- Flag out Inconsistent Data Type
+
+Data Transformation Suggestions
+- Log transform or Box-Cox transform recommendations for skewed numeric columns
+- Recommended Encoding Suggestions (Ordinal, Target)
+
+Correlation Tab for Numerical Variables
+- Users can plot correlation heatmap or visualizations
+- Other visualizations for categorical vs numeric
+
+Smart Apply
+- Button that automatically takes in all recommendations and applies
+
+Download
+- Ability to download new csv/db from dataframe
+- Ability to create pipeline for datacleaning code

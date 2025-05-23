@@ -27,9 +27,47 @@ def read_data(file_path):
     else:
         raise ValueError(f"Unsupported File Type: {ext}")
     
+def get_dataframe_summary(df: pd.DataFrame) -> dict:
+    # Number of Rows and Columns
+    num_rows, num_cols = df.shape[:2]
+    # List of Col Names
+    col_names = ", ".join(df.columns.tolist())
+    # Number of Duplicate Rows
+    num_duplicate_rows = df.duplicated().sum()
+
+    # Number of Rows exceeding Missing Value Thresholds
+    missing_thresholds = {
+        ">10% Values Missing": (df.isnull().sum(axis=1) > num_cols / 10).sum(),
+        ">25% Values Missing": (df.isnull().sum(axis=1) > num_cols / 4).sum(),
+        ">50% Values Missing": (df.isnull().sum(axis=1) > num_cols / 2).sum(),
+    }
+    missing_filtered = {k: int(v) for k, v in missing_thresholds.items() if v > 0}
+
+    # Top 5 Columns with Missing Values
+    col_missing_counts = df.isnull().sum()
+    top5_missing_cols = col_missing_counts.sort_values(ascending=False).head(5)
+    top5_missing_dict = {col: int(count) for col, count in top5_missing_cols.items() if count > 0}
+    
+    df_summary = {
+        "Column Names": col_names,
+        "Number of Columns": num_cols,
+        "Number of Rows": num_rows,
+        "Number of Duplicate Rows": int(num_duplicate_rows),
+    }
+
+    if missing_filtered:
+        df_summary["Number of Rows with Missing Values(%)"] = missing_filtered
+        if missing_filtered.get(">25% Values Missing") or missing_filtered.get(">50% Values Missing"):
+            df_summary["Recommendation"] = "Consider dropping rows with large amounts/(%) of missing values"
+    
+    if top5_missing_dict:
+        df_summary["Columns with Most Missing Values"] = top5_missing_dict
+
+    return df_summary
+
 
 def get_general_summary(series):
-    # Get Data Type
+    # Get Data Type Distribution
     col_summary = {'Data Type': str(series.dtype)}
     # Get Number of Unique Values
     num_unique = series.nunique(dropna=True)
@@ -189,7 +227,6 @@ def get_column_summary(df, col):
     # If Index Column
     if num_unique == len(series):
         col_summary['Recommendation'] = "Index Column (Every row has unique value)"
-        return col_summary
 
     # If Numerical Column or should be Parsed to Numerical Column, get Numeric Summary
     numeric_series = pd.to_numeric(series, errors='coerce')

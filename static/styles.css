@@ -17,6 +17,11 @@ h1 {
     font-weight: 700;
 }
 
+.header-link {
+    font-weight: bold;
+    text-decoration: none;
+}
+
 /* Container for Upload or Table Pages */
 .upload-container,
 .table-container {

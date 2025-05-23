@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>
+        DataGlimpse: {{ 'Col Summary' if is_col else 'DataFrame Summary' }}
+    </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>
+        Summary for {{ column if is_col else 'DataFrame' }}
+    </h1>
+
+    {% if from_page == 'edit' %}
+        <a href="{{ url_for('edit_data') }}" class="back-link">&larr; Back to Edit Page</a>
+    {% else %}
+        <a href="{{ url_for('view_data', page=1) }}" class="back-link">&larr; Back to Data Preview</a>
+    {% endif %}
+
+    {% if summary %}
+        <table border="1" cellpadding="4" cellspacing="0">
+            {% for key, value in summary.items() %}
+                <tr>
+                    <th>{{ key }}</th>
+                    <td>
+                        {% if value is mapping %}
+                            <table border="1" cellpadding="3" cellspacing="0" style="margin: 5px;">
+                                {% for subkey, subvalue in value.items() %}
+                                    <tr>
+                                        <th>{{ subkey }}</th>
+                                        <td>{{ subvalue }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        {% elif 'Distribution' in key %}
+                            {{ value | safe }}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No summary data available for this column.</p>
+    {% endif %}
+
+</body>
+</html>

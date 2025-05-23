@@ -21,23 +21,27 @@
                         <th>Rename</th>
                         <th>Drop Column</th>
                         <th>Drop NA / None</th>
+                        <th>Current Datatype</th>
                         <th>Convert Datatype</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for col in columns %}
                     <tr>
-                        <td>{{ col }}</td>
+                        <td><a href="{{ url_for('column_summary', column=col, from='edit') }}">{{ col }}</a></td>
                         <td><input type="text" name="rename_{{ col }}" placeholder="New name" autocomplete="off" /></td>
                         <td><input type="checkbox" name="dropcol_{{ col }}" /></td>
                         <td><input type="checkbox" name="dropna_{{ col }}" /></td>
+                        <td>{{ dtypes_map.get(col, 'Unknown') }}</td>
                         <td>
                             <select name="convert_{{ col }}">
                                 <option value="" selected>-- Select --</option>
                                 <option value="numeric">Convert to Numeric</option>
                                 <option value="datetime">Convert to Datetime</option>
                                 <option value="categorical">Convert to Categorical</option>
-                                <option value="binary">Convert to Binary</option>
+                                <option value="binary" {% if unique_values_map.get(col, 0) != 2 %}disabled{% endif %}>
+                                    Convert to Binary{% if unique_values_map.get(col, 0) != 2 %} (Unique Values != 2){% endif %}
+                                </option>
                             </select>
                         </td>
                     </tr>
@@ -50,5 +54,37 @@
             </div>
         </form>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+        
+            // Loop through Input/Select Elements in the Form
+            form.querySelectorAll('input, select').forEach(el => {
+                // Restore Saved Values from localStorage
+                const val = localStorage.getItem(el.name);
+                if (val !== null) {
+                    if (el.type === 'checkbox') {
+                        el.checked = val === 'true';    // Restore Checkbox State
+                    } else {
+                        el.value = val;                 // Restore Text/Select Input Values
+                    }
+                }
+        
+                // Save New Value to localStorage on Change
+                el.onchange = () => {
+                    const toSave = el.type === 'checkbox' ? el.checked : el.value;
+                    localStorage.setItem(el.name, toSave);
+                };
+            });
+        
+            // Clear localStorage Values when Form is Submitted
+            form.onsubmit = () => {
+                form.querySelectorAll('input, select').forEach(el => {
+                    localStorage.removeItem(el.name);
+                });
+            };
+        });
+        </script>
 </body>
 </html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>DataGlimpse: Exploratory Data Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.3rem; font-weight: bold; }
+        select, button { padding: 0.4rem; font-size: 1rem; }
+        .plot-img { margin-top: 1rem; max-width: 100%; height: auto; border: 1px solid #ddd; padding: 0.5rem; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Exploratory Data Analysis</h1>
+
+        {% if error_msg %}
+            <p class="error">{{ error_msg }}</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('eda') }}">
+            <div class="form-group">
+                <label for="var1">Select Variable 1:</label>
+                <select name="var1" id="var1" required>
+                    <option value="">--Select--</option>
+                    {% for col in columns %}
+                        <option value="{{ col }}">{{ col }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="var2">Select Variable 2 (optional for some plots):</label>
+                <select name="var2" id="var2">
+                    <option value="">--None--</option>
+                    {% for col in columns %}
+                        <option value="{{ col }}">{{ col }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="plot_type">Select Plot Type:</label>
+                <select name="plot_type" id="plot_type" required>
+                    <option value="">--Select Plot--</option>
+                    <optgroup label="Single Variable">
+                        <option value="histogram">Histogram</option>
+                        <option value="boxplot">Boxplot</option>
+                        <option value="barchart">Bar Chart</option>
+                        <option value="density">Density Plot</option>
+                    </optgroup>
+                    <optgroup label="Two Variables">
+                        <option value="scatter">Scatter Plot</option>
+                        <option value="line">Line Plot</option>
+                        <option value="heatmap">Heatmap (2D Histogram)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <button type="submit">Generate Plot</button>
+        </form>
+
+        {% if plot_img %}
+            <img src="{{ plot_img }}" alt="Plot Image" class="plot-img" />
+        {% endif %}
+    </main>
+</body>
+</html>
