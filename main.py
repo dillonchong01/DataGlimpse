@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, s
 import math
 import os
 import io
+import base64
 from flask_caching import Cache
 from summary_functions import read_data, get_column_summary, get_dataframe_summary
 from editing_functions import apply_edits
@@ -172,33 +173,46 @@ def eda():
 
     columns = list(df.columns)
 
-    # Default: all plot types
-    single_var_types = ['histogram', 'boxplot', 'barchart', 'density']
-    two_var_types = ['scatter', 'line', 'heatmap']
+    # Variable Counts for each Plot Type
+    plot_var_counts = {
+        'histogram': 1,
+        'density': 1,
+        'barchart': 1,
+        'piechart': 1,
+        'boxplot': [1, 2],
+        'violin': 2,
+        'scatter': 2,
+        'line': 2,
+        'heatmap': 2
+    }
 
-    var1 = None
-    var2 = None
-    plot_types = single_var_types + two_var_types  # default, if nothing selected yet
+    plot_type = request.form.get('plot_type')
+    var1 = request.form.get('var1')
+    var2 = request.form.get('var2')
+    var_count = plot_var_counts.get(plot_type) if plot_type else None
 
-    if request.method == 'POST':
-        var1 = request.form.get('var1')
-        var2 = request.form.get('var2')
-        # Adjust plot types based on selection
-        if var2 and var2.strip():
-            plot_types = two_var_types
-        else:
-            plot_types = single_var_types
-
-        plot_type = request.form.get('plot_type')
-
-        if var1 and plot_type:
+    fig = None
+    if plot_type and var1:
+        if var_count == 1:
+            fig = get_plot(df, var1, plot_type)
+        elif isinstance(var_count, list) and 2 in var_count:
+            if var2:
+                fig = get_plot(df, var1, plot_type, var2)
+            else:
+                fig = get_plot(df, var1, plot_type)
+        elif var_count == 2 and var2:
             fig = get_plot(df, var1, plot_type, var2)
-            img = io.BytesIO()
-            fig.savefig(img, format='png')
-            img.seek(0)
-            return send_file(img, mimetype='image/png')
+    
+    if fig:
+        img = io.BytesIO()
+        fig.savefig(img, format='png')
+        img.seek(0)
+        plot_data = base64.b64encode(img.getvalue()).decode('utf8')
+    else:
+        plot_data = None
 
-    return render_template('eda.html', columns=columns, plot_types=plot_types, var1=var1, var2=var2)
+    return render_template('eda.html', columns=columns, plot_types=list(plot_var_counts.keys()),
+                           plot_type=plot_type, var1=var1, var2=var2, var_count=var_count, plot_data=plot_data)
 
 
 if __name__ == '__main__':

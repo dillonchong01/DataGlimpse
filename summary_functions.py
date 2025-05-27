@@ -84,6 +84,8 @@ def get_general_summary(series):
         missing['NA'] = series.isna().sum()
     missing_count = sum(missing.values())
     missing_percentage = round(missing_count / len(series) * 100, 4)
+    if missing_percentage > 50:
+        col_summary['Recommendation'] = 'Consider D'
     col_summary['Missing Values'] = missing or 0
     if missing_percentage > 0:
         col_summary['Missing Values (%)'] = f'{missing_percentage}% ({missing_count} of {len(series)})'
@@ -242,8 +244,17 @@ def get_column_summary(df, col):
         if not pd.api.types.is_numeric_dtype(series):
             col_summary['Recommendation'] = f'Convert to Numeric Variable ({numeric_percentage}% can be converted)'
 
+    # If Inconsistent Datatype (20% - 80% can be converted to Numeric), Flag it Out
+    if 20 <= numeric_percentage <= 80:
+        na_percentage = col_summary.get('Missing Values (%)', None)
+        if na_percentage:
+            na_percentage = float(na_percentage.split('%')[0])
+            col_summary['Recommendation'] = f'Inconsistent DataType ({numeric_percentage}% Numeric, {na_percentage}% None, {100 - numeric_percentage - na_percentage}% String)'
+        else:
+            col_summary['Recommendation'] = f'Inconsistent DataType ({numeric_percentage}% Numeric, {100 - numeric_percentage}% String)'
+
     # If Categorical Column or should be Parsed to Categorical Column, get Categorical Summary
-    if series.dtype in ['object', 'category'] and num_unique/len(series) <= CATEGORY_THRESHOLD:
+    if (series.dtype == 'object' and num_unique/len(series) <= CATEGORY_THRESHOLD) or series.dtype == 'category':
         update_categorical_summary(series, col_summary)
 
         # Recommend to parse to Categorical

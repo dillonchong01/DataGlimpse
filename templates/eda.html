@@ -1,70 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>DataGlimpse: Exploratory Data Analysis</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: 0.3rem; font-weight: bold; }
-        select, button { padding: 0.4rem; font-size: 1rem; }
-        .plot-img { margin-top: 1rem; max-width: 100%; height: auto; border: 1px solid #ddd; padding: 0.5rem; }
-        .error { color: red; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EDA Plot Selection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 <body>
-    <main class="container">
-        <h1>Exploratory Data Analysis</h1>
+    <div class="upload-container">
+        <h1>Select Plot Type and Variables</h1>
 
-        {% if error_msg %}
-            <p class="error">{{ error_msg }}</p>
-        {% endif %}
-
-        <form method="post" action="{{ url_for('eda') }}">
-            <div class="form-group">
-                <label for="var1">Select Variable 1:</label>
-                <select name="var1" id="var1" required>
-                    <option value="">--Select--</option>
-                    {% for col in columns %}
-                        <option value="{{ col }}">{{ col }}</option>
-                    {% endfor %}
+        <form method="POST" id="eda-form" class="eda-form">
+            <div class="form-row">
+                <label for="plot_type">Plot Type:</label>
+                <select name="plot_type" id="plot_type" class="eda-form-select" required>
+                <option value="" disabled selected>Select plot type</option>
+                {% for pt in plot_types %}
+                    <option value="{{ pt }}" {% if pt == plot_type %}selected{% endif %}>{{ pt.capitalize() }}</option>
+                {% endfor %}
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="var2">Select Variable 2 (optional for some plots):</label>
-                <select name="var2" id="var2">
-                    <option value="">--None--</option>
-                    {% for col in columns %}
-                        <option value="{{ col }}">{{ col }}</option>
-                    {% endfor %}
+            <div class="form-row" id="var1-container">
+                <label for="var1">Variable 1:</label>
+                <select name="var1" id="var1" class="eda-form-select" required>
+                <option value="" disabled selected>Select variable</option>
+                {% for col in columns %}
+                    <option value="{{ col }}" {% if col == var1 %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="plot_type">Select Plot Type:</label>
-                <select name="plot_type" id="plot_type" required>
-                    <option value="">--Select Plot--</option>
-                    <optgroup label="Single Variable">
-                        <option value="histogram">Histogram</option>
-                        <option value="boxplot">Boxplot</option>
-                        <option value="barchart">Bar Chart</option>
-                        <option value="density">Density Plot</option>
-                    </optgroup>
-                    <optgroup label="Two Variables">
-                        <option value="scatter">Scatter Plot</option>
-                        <option value="line">Line Plot</option>
-                        <option value="heatmap">Heatmap (2D Histogram)</option>
-                    </optgroup>
+            <div class="form-row" id="var2-container">
+                <label for="var2">Variable 2:</label>
+                <select name="var2" id="var2" class="eda-form-select">
+                <option value="" selected>Select variable</option>
+                {% for col in columns %}
+                    <option value="{{ col }}" {% if col == var2 %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
                 </select>
             </div>
 
-            <button type="submit">Generate Plot</button>
+            <button type="submit" class="button">Generate Plot</button>
+            
         </form>
 
-        {% if plot_img %}
-            <img src="{{ plot_img }}" alt="Plot Image" class="plot-img" />
+        {% if plot_data %}
+            <div class="plot-container" style="margin-top: 1rem; text-align: center;">
+                <img src="data:image/png;base64,{{ plot_data }}" alt="Generated Plot" style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 4px;" />
+            </div>
         {% endif %}
-    </main>
+    </div>
+
+    <script>
+        const plotVarCounts = {
+            'histogram': 1,
+            'density': 1,
+            'barchart': 1,
+            'piechart': 1,
+            'boxplot': [1, 2],
+            'violin': 2,
+            'scatter': 2,
+            'line': 2,
+            'heatmap': 2
+        };
+
+        const labelMap = {
+            'histogram': ['Variable 1 (Numeric)'],
+            'density': ['Variable 1 (Numeric)'],
+            'barchart': ['Variable 1 (Category)'],
+            'piechart': ['Variable 1 (Category)'],
+            'boxplot': ['Variable 1 (Numeric)', 'Variable 2 (Category, Optional)'],
+            'violin': ['Variable 1 (Category)', 'Variable 2 (Numeric)'],
+            'scatter': ['Variable 1 (Numeric)', 'Variable 2 (Numeric)'],
+            'line': ['Variable 1 (DateTime/Ordered Category)', 'Variable 2 (Numeric)'],
+            'heatmap': ['Variable 1 (Category)', 'Variable 2 (Category/Numeric)']
+        };
+
+        const plotTypeSelect = document.getElementById('plot_type');
+        const var1Container = document.getElementById('var1-container');
+        const var2Container = document.getElementById('var2-container');
+        const var1Select = document.getElementById('var1');
+        const var2Select = document.getElementById('var2');
+        const var1Label = document.querySelector("label[for='var1']");
+        const var2Label = document.querySelector("label[for='var2']");
+
+        function updateVariableInputs() {
+            const selectedPlot = plotTypeSelect.value;
+            const varCount = plotVarCounts[selectedPlot];
+            const labels = labelMap[selectedPlot];
+
+            // Hide all by default
+            var1Container.style.display = 'none';
+            var2Container.style.display = 'none';
+            var1Select.required = false;
+            var2Select.required = false;
+
+            if (selectedPlot && labels) {
+            // Show var1
+            var1Container.style.display = 'block';
+            var1Label.textContent = labels[0];
+            var1Select.required = true;
+
+            // Show var2 if applicable
+            if (labels.length > 1) {
+                var2Container.style.display = 'block';
+                var2Label.textContent = labels[1];
+
+                if (Array.isArray(varCount)) {
+                var2Select.required = false; // boxplot allows optional var2
+                } else {
+                var2Select.required = true;
+                }
+            }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', updateVariableInputs);
+
+        plotTypeSelect.addEventListener('change', () => {
+            var1Select.value = "";
+            var2Select.value = "";
+            updateVariableInputs();
+        });
+        </script>
+
 </body>
 </html>

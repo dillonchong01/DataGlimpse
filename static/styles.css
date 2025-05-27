@@ -13,7 +13,7 @@ h1 {
     margin: 0em;
     font-size: 2.25rem;
     text-align: center;
-    color: #1f2937; /* Darker slate */
+    color: #1f2937;
     font-weight: 700;
 }
 
@@ -30,13 +30,14 @@ h1 {
     background: #ffffff;
     padding: 1.5em;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12); /* subtle purple shadow */
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
     transition: box-shadow 0.3s ease;
 }
 
 .upload-container {
     max-width: 60%;
 }
+
 .table-container {
     max-width: 100%;
 }
@@ -56,6 +57,10 @@ input[type="file"] {
     cursor: pointer;
 }
 
+label {
+  white-space: nowrap;
+}
+
 /* Buttons */
 button {
     background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
@@ -73,6 +78,13 @@ button {
 button:hover {
     background: linear-gradient(135deg, #3730a3 0%, #4c51bf 100%);
     box-shadow: 0 6px 20px rgba(55, 48, 163, 0.4);
+}
+
+button:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
+    color: #ffffff;
 }
 
 /* Table Styles */
@@ -106,6 +118,11 @@ th {
     letter-spacing: 0.02em;
 }
 
+th:hover {
+    cursor: pointer;
+    background: linear-gradient(90deg, #c7d2fe, #a5b4fc);
+}
+
 td {
     background-color: #ffffff;
     font-size: 0.7rem;
@@ -121,7 +138,6 @@ tr:hover td {
     position: relative;
     height: 3.5em;
 }
-
 
 .nav-overlap-container .back-link {
     position: absolute;
@@ -206,6 +222,7 @@ a:hover {
     cursor: pointer;
 }
 
+/* Edit Form */
 .edit-form {
     max-width: 100%;
     background: #ffffff;
@@ -254,14 +271,7 @@ a:hover {
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.edit-form input[type="text"]:focus,
-.edit-form select:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    outline: none;
-}
-
-/* Checkbox styling (keeps it clean but consistent) */
+/* Checkbox styling */
 .edit-form input[type="checkbox"] {
     transform: scale(1.2);
     cursor: pointer;
@@ -277,4 +287,54 @@ a:hover {
     justify-content: flex-end;
     align-items: center;
     gap: 1rem;
+}
+
+/* Form container */
+.eda-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* Stack label above select */
+.form-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Label styling */
+.form-row label {
+    display: block;
+    font-weight: bold;
+    width: 250px; 
+    text-align: left;
+}
+
+/* Select box styling */
+.eda-form-select {
+    width: 250px;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+.edit-form input[type="text"],
+.edit-form select,
+.datetime-format-input {
+    box-sizing: border-box;
+}
+
+.datetime-format-input {
+    display: none;
+    width: 80% !important;
 }
