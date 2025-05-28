@@ -76,14 +76,19 @@ table {
     overflow: hidden;
     background: #ffffff;
     transition: transform 0.2s ease;
-    min-width: max-content;
+}
+
+.table-scroll {
+    overflow-x: auto;
+    width: 100%;
+    margin: 1rem 0 2rem;
 }
 
 th, td {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 1rem 0.2rem;
     text-align: left;
     border-bottom: 1px solid #ddd;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
 }
 
 th {
@@ -106,12 +111,6 @@ td {
 
 tr:hover td {
     background-color: #eef2ff;
-}
-
-.table-scroll {
-    overflow-x: auto;
-    width: 100%;
-    margin: 1rem 0 2rem;
 }
 
 /* Pagination */

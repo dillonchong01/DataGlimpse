@@ -94,8 +94,8 @@ def view_data(page=1):
     if error:
         return redirect(url_for('upload_file'))
 
-    # Loads 50 Rows per Page
-    page_size = 50
+    # Loads 100 Rows per Page
+    page_size = 100
     total_pages = math.ceil(len(df) / page_size)
 
     # Return to Page 1 if Out of Bounds
