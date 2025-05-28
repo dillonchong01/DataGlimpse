@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, s
 import math
 import os
 import io
+import sqlite3
 import base64
 from flask_caching import Cache
 from summary_functions import read_data, get_column_summary, get_dataframe_summary
@@ -14,6 +15,16 @@ app.secret_key = 'unique'
 # Initialize Temporary Folder to Store Files
 UPLOAD_FOLDER = 'temp'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Clear Data in Temporary Folder
+for filename in os.listdir(UPLOAD_FOLDER):
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.isfile(file_path) or os.path.islink(file_path):
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            print(f'Failed to delete {file_path}. Reason: {e}')
+
 allowed_extensions = {'.csv', '.sqlite', '.sqlite3', '.db'}
 
 def allowed_file(filename):
@@ -38,7 +49,7 @@ def get_uploaded_dataframe():
             df = read_data(file_path)
         except Exception as e:
             return None, (f"Error reading file: {str(e)}", 400), None
-        cache.set(filename, df, timeout=300)
+        cache.set(filename, df, timeout=3600)
 
     return df, None, filename
 
@@ -81,7 +92,7 @@ def view_data(page=1):
     # Get Dataframe from Cache
     df, error, _ = get_uploaded_dataframe()
     if error:
-        return error
+        return redirect(url_for('upload_file'))
 
     # Loads 50 Rows per Page
     page_size = 50
@@ -109,7 +120,7 @@ def column_summary(column):
     # Get Dataframe from Cache
     df, error, _ = get_uploaded_dataframe()
     if error:
-        return error
+        return redirect(url_for('upload_file'))
     
     # Get Previous Page
     from_page = request.args.get('from', 'view')
@@ -127,7 +138,7 @@ def general_summary():
     # Get Dataframe from Cache
     df, error, _ = get_uploaded_dataframe()
     if error:
-        return error
+        return redirect(url_for('upload_file'))
 
     # Get Previous Page
     from_page = request.args.get('from', 'view')
@@ -145,11 +156,17 @@ def edit_data():
     # Get Dataframe from Cache
     df, error, filename = get_uploaded_dataframe()
     if error:
-        return error
+        return redirect(url_for('upload_file'))
     
     if request.method == 'POST':
-        df = apply_edits(df, request.form)
-        cache.set(filename, df, timeout=300)
+        df, log_text = apply_edits(df, request.form)
+        cache.set(filename, df, timeout=3600)
+
+        # Append log_text to File
+        log_path = os.path.join(UPLOAD_FOLDER, 'edit_logs.txt')
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(log_text + "\n")
+
         return redirect(url_for('view_data', page=1))
     
     # Get Number of Unique Values per Column
@@ -169,7 +186,7 @@ def edit_data():
 def eda():
     df, error, _ = get_uploaded_dataframe()
     if error:
-        return error
+        return redirect(url_for('upload_file'))
 
     columns = list(df.columns)
 
@@ -214,6 +231,43 @@ def eda():
     return render_template('eda.html', columns=columns, plot_types=list(plot_var_counts.keys()),
                            plot_type=plot_type, var1=var1, var2=var2, var_count=var_count, plot_data=plot_data)
 
+@app.route('/download')
+def download_data():
+    df, error, _ = get_uploaded_dataframe()
+    if error:
+        return redirect(url_for('upload_file'))
+    
+    fmt = request.args.get('format', 'csv').lower() 
+    if fmt == 'csv':
+        # Convert df to CSV and Send
+        csv_data = df.to_csv(index=False)
+        return send_file(io.BytesIO(csv_data.encode()), mimetype='text/csv', as_attachment=True, download_name='DataGlimpse.csv')
+    
+    elif fmt == 'db':
+        # Write df to a Temporary SQLite File
+        temp_db_path = os.path.join(UPLOAD_FOLDER, 'temp_download.db')
+        
+        # Remove Old Temp File if exists
+        if os.path.exists(temp_db_path):
+            os.remove(temp_db_path)
+        
+        # Save to SQLite and Send
+        conn = sqlite3.connect(temp_db_path)
+        df.to_sql('data', conn, index=False, if_exists='replace')
+        conn.close()
+        return send_file(temp_db_path, mimetype='application/x-sqlite3', as_attachment=True,download_name='DataGlimpse.db')
+    
+    # Obtain Data Transformation Logs
+    elif fmt == 'log_txt':
+        log_path = os.path.join(UPLOAD_FOLDER, 'edit_logs.txt')
+        if not os.path.exists(log_path):
+            return "No logs available", 404
+        
+        return send_file(log_path, mimetype='text/plain', as_attachment=True, download_name='Data_Transformation.txt')
+    
+    else:
+        return "Unsupported Download Format", 400
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

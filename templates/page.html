@@ -1,78 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <title>DataGlimpse: Data Preview</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <main class = "edit-form">
-        <div class="container">
-            <h1><a href="{{ url_for('general_summary') }}" class="header-link">Data Preview</a></h1>
+{% extends "base.html" %}
 
-            <div class="nav-overlap-container">
-                <a href="/" class="back-link">&larr; Upload New Dataset</a>
+{% block title %}DataGlimpse: Data Preview{% endblock %}
 
-                <div class="pagination" role="navigation" aria-label="Pagination Navigation">
-                    <a href="{{ url_for('view_data', page=1) }}" 
-                       class="{{ 'active' if page == 1 else '' }}" 
-                       {% if page == 1 %}aria-current="page"{% endif %}>
-                        1
+{% block content %}
+<div class="container">
+    <h1><a href="{{ url_for('general_summary') }}" style="font-weight: bold;">Data Preview</a></h1>
+
+    <div class="nav-overlap-container">
+        <div class="pagination" role="navigation" aria-label="Pagination Navigation">
+            <a href="{{ url_for('view_data', page=1) }}" 
+               class="{{ 'active' if page == 1 else '' }}" 
+               {% if page == 1 %}aria-current="page"{% endif %}>
+                1
+            </a>
+
+            {% if page > 3 %}
+                ...
+            {% endif %}
+
+            {% for p in range(page-1, page+2) %}
+                {% if 1 < p < total_pages %}
+                    <a href="{{ url_for('view_data', page=p) }}" 
+                       class="{{ 'active' if p == page else '' }}" 
+                       {% if p == page %}aria-current="page"{% endif %}>
+                        {{ p }}
                     </a>
+                {% endif %}
+            {% endfor %}
 
-                    {% if page > 3 %}
-                        ...
-                    {% endif %}
+            {% if page < total_pages - 2 %}
+                ...
+            {% endif %}
 
-                    {% for p in range(page-1, page+2) %}
-                        {% if 1 < p < total_pages %}
-                            <a href="{{ url_for('view_data', page=p) }}" 
-                               class="{{ 'active' if p == page else '' }}" 
-                               {% if p == page %}aria-current="page"{% endif %}>
-                                {{ p }}
-                            </a>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if page < total_pages - 2 %}
-                        ...
-                    {% endif %}
-
-                    {% if total_pages > 1 %}
-                        <a href="{{ url_for('view_data', page=total_pages) }}" 
-                           class="{{ 'active' if page == total_pages else '' }}" 
-                           {% if page == total_pages %}aria-current="page"{% endif %}>
-                            {{ total_pages }}
-                        </a>
-                    {% endif %}
-                </div>
-
-                <a href="{{ url_for('edit_data') }}" class="edit-link">Edit Data &rarr;</a>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            {% for col in columns %}
-                                <th scope="col">
-                                    <a href="{{ url_for('column_summary', column=col, from='view') }}">{{ col }}</a>
-                                </th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in page_data %}
-                            <tr>
-                                {% for col in columns %}
-                                    <td>{{ row[col] }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {% if total_pages > 1 %}
+                <a href="{{ url_for('view_data', page=total_pages) }}" 
+                   class="{{ 'active' if page == total_pages else '' }}" 
+                   {% if page == total_pages %}aria-current="page"{% endif %}>
+                    {{ total_pages }}
+                </a>
+            {% endif %}
         </div>
-    </main>
-</body>
-</html>
+    </div>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    {% for col in columns %}
+                        <th scope="col">
+                            <a href="{{ url_for('column_summary', column=col, from='view') }}">{{ col }}</a>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in page_data %}
+                    <tr>
+                        {% for col in columns %}
+                            <td>{{ row[col] }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

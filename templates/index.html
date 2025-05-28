@@ -1,18 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DataGlimpse: Upload</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="upload-container">
-        <h1>Upload your CSV or SQLite File</h1>
-        <form method="POST" action="/" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".csv, .sqlite, .sqlite3, .db" required />
-            <button type="submit">Upload</button>
-        </form>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}DataGlimpse: Upload{% endblock %}
+
+{% block content %}
+<div class="centered-form">
+    <h1>Upload your CSV or SQLite File</h1>
+    <form method="POST" action="/" enctype="multipart/form-data">
+        <input type="file" id="file-upload" name="file" accept=".csv, .sqlite, .sqlite3, .db" required />
+        <button type="submit">Upload</button>
+    </form>
+    
+</div>
+{% endblock %}

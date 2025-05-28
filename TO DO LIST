@@ -1,12 +1,14 @@
-Data Transformation Suggestions
-- Log transform or Box-Cox transform recommendations for skewed numeric columns
-- Recommended Encoding Suggestions (Ordinal, Target)
-
 Smart Apply
 - Button that automatically takes in all recommendations and applies
 
-Download
-- Ability to download new csv/db from dataframe
-- Ability to create pipeline for datacleaning code
+Able to get add in more generic "natural language" text edits
 
 Is it a binary column if there are 2 categories, and NA values
+
+Convert to all uppercase or all lowercase
+- Reminder (If categories are A, a) - need to handle
+
+Handling of NA values
+- drop rows
+- use mean, median
+- use most common category

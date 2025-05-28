@@ -73,23 +73,24 @@ def get_general_summary(series):
     num_unique = series.nunique(dropna=True)
     col_summary['Unique Values'] = f'{num_unique} (Out of {len(series)})'
     # Get Number of "Missing Values"
-    uppercase_series = series.astype(str).str.strip().str.lower()
+    uppercase_series = series.astype(str).str.strip().str.upper()
     MISSING_VALUES = ['NONE', 'NIL', 'NA', 'NULL', 'N/A', '', ' ']
+    print(uppercase_series)
     missing = {}
     for value in MISSING_VALUES:
         count = (uppercase_series == value).sum()
         if count > 0:
             missing[value] = count
     if series.isna().sum() > 0:
-        missing['NA'] = series.isna().sum()
+        missing['NaN'] = series.isna().sum()
     missing_count = sum(missing.values())
     missing_percentage = round(missing_count / len(series) * 100, 4)
-    if missing_percentage > 50:
-        col_summary['Recommendation'] = 'Consider D'
     col_summary['Missing Values'] = missing or 0
     if missing_percentage > 0:
         col_summary['Missing Values (%)'] = f'{missing_percentage}% ({missing_count} of {len(series)})'
-    
+    if missing_percentage > 50:
+        col_summary['Recommendation'] = f'High Percentage ({missing_percentage}%) of missing values - Consider if Column is Necessary)'
+
     return col_summary
 
 
@@ -127,7 +128,7 @@ def update_numeric_summary(numeric_series, col_summary):
     if not pd.isna(q3):
         col_summary['Upper Quartile'] = float(q3)
     if outliers_count:
-        col_summary['Outlier Count (1.5x IQR)'] = int(outliers_count)
+        col_summary['Outlier Count (1.5x IQR)'] = f'{outliers_count} ({round(outliers_count / len(numeric_series) * 100, 2)})%'
 
 
 def update_categorical_summary(series, col_summary):

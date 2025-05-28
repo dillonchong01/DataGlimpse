@@ -1,9 +1,7 @@
-/* Global Styles */
+/* Base Styles */
 body {
     font-family: 'Segoe UI', Roboto, sans-serif;
-    background-color: #f4f6f9;
-    margin: 0;
-    padding: 2em;
+    background-color: #ffffff;
     color: #333;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -17,38 +15,48 @@ h1 {
     font-weight: 700;
 }
 
-.header-link {
-    font-weight: bold;
-    text-decoration: none;
-}
-
-/* Container for Upload or Table Pages */
-.upload-container,
-.table-container {
-    overflow-x: auto;
-    margin: 0 auto 2em;
-    background: #ffffff;
-    padding: 1.5em;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
-    transition: box-shadow 0.3s ease;
-}
-
-.upload-container {
-    max-width: 60%;
-}
-
-.table-container {
+.top-bar {
     max-width: 100%;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    gap: 1rem;
 }
 
-/* File Upload */
-.upload-container form {
+
+main {
+    width: 90%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    gap: 1em;
-    margin: 1.5em 0;
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+    background-color: #E6E0F8;
+    border-radius: 12px;
+    padding: 0 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    max-width: 100%;
+    padding: 1rem;
+}
+
+/* Upload Page Styles */
+.centered-form {
+    padding: 1rem;
+    margin: 0 auto;
+}
+
+.centered-form form {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
 }
 
 input[type="file"] {
@@ -57,37 +65,8 @@ input[type="file"] {
     cursor: pointer;
 }
 
-label {
-  white-space: nowrap;
-}
 
-/* Buttons */
-button {
-    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-    color: white;
-    padding: 0.75em 1.6em;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-button:hover {
-    background: linear-gradient(135deg, #3730a3 0%, #4c51bf 100%);
-    box-shadow: 0 6px 20px rgba(55, 48, 163, 0.4);
-}
-
-button:disabled {
-    background: #cbd5e1;
-    cursor: not-allowed;
-    box-shadow: none;
-    color: #ffffff;
-}
-
-/* Table Styles */
+/* Table Page Styles */
 table {
     width: 100%;
     border-collapse: separate;
@@ -97,24 +76,21 @@ table {
     overflow: hidden;
     background: #ffffff;
     transition: transform 0.2s ease;
-}
-
-table:hover {
-    transform: translateY(-2px);
+    min-width: max-content;
 }
 
 th, td {
-    padding: 10px;
+    padding: 0.5rem 1rem;
     text-align: left;
-    border-bottom: 1px solid #f0f0f5;
-    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.7rem;
 }
 
 th {
     background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
     font-weight: 700;
     color: #1e293b;
-    font-size: 0.8rem;
+    font-size: 0.8rem; /* Override td font-size */
     letter-spacing: 0.02em;
 }
 
@@ -125,7 +101,6 @@ th:hover {
 
 td {
     background-color: #ffffff;
-    font-size: 0.7rem;
     color: #374151;
 }
 
@@ -133,24 +108,16 @@ tr:hover td {
     background-color: #eef2ff;
 }
 
+.table-scroll {
+    overflow-x: auto;
+    width: 100%;
+    margin: 1rem 0 2rem;
+}
+
 /* Pagination */
 .nav-overlap-container {
-    position: relative;
-    height: 3.5em;
-}
-
-.nav-overlap-container .back-link {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: 0.5em 0;
-}
-
-.nav-overlap-container .edit-link {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    padding: 0.5em 0;
+    margin: 0;
+    padding: 0;
 }
 
 .pagination {
@@ -158,7 +125,6 @@ tr:hover td {
     justify-content: center;
     align-items: center;
     gap: 0.5em;
-    padding: 1rem 0;
     flex-wrap: wrap;
 }
 
@@ -180,7 +146,6 @@ tr:hover td {
     background: linear-gradient(to right, #dbeafe, #c7d2fe);
     color: #1e3a8a;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    transform: translateY(-2px);
     border-color: #93c5fd;
 }
 
@@ -206,7 +171,45 @@ tr:hover td {
     box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* Links (e.g., Column Summary) */
+/* Buttons */
+button,
+.nav-button.select-style {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: white;
+    padding: 0.75em 1.4em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-button.select-style {
+    width: 185px; /* adjust as needed */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-button.select-style option {
+    color: black;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #3730a3 0%, #4c51bf 100%);
+    box-shadow: 0 6px 20px rgba(55, 48, 163, 0.4);
+}
+
+button:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
+    color: #ffffff;
+}
+
+/* Links Styles */
 a {
     color: #4f46e5;
     text-decoration: none;
@@ -222,7 +225,7 @@ a:hover {
     cursor: pointer;
 }
 
-/* Edit Form */
+/* Edit Page Styles */
 .edit-form {
     max-width: 100%;
     background: #ffffff;
@@ -262,6 +265,7 @@ a:hover {
 .edit-form input[type="text"],
 .edit-form select {
     width: 80%;
+    
     padding: 8px 10px;
     font-size: 0.85rem;
     border: 1.5px solid #cbd5e1;
@@ -269,6 +273,10 @@ a:hover {
     background-color: #f9fafb;
     color: #1f2937;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.column-select {
+    width: 240px;
 }
 
 /* Checkbox styling */
@@ -289,7 +297,7 @@ a:hover {
     gap: 1rem;
 }
 
-/* Form container */
+/* EDA Page Styling */
 .eda-form {
     display: flex;
     flex-direction: column;
@@ -298,14 +306,12 @@ a:hover {
     margin: 0 auto;
 }
 
-/* Stack label above select */
 .form-row {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Label styling */
 .form-row label {
     display: block;
     font-weight: bold;
@@ -313,7 +319,7 @@ a:hover {
     text-align: left;
 }
 
-/* Select box styling */
+
 .eda-form-select {
     width: 250px;
     padding: 0.5rem 0.75rem;
@@ -323,7 +329,6 @@ a:hover {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Utility */
 .hidden {
     display: none !important;
 }
