@@ -1,6 +1,6 @@
 /* Base Styles */
 body {
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #ffffff;
     color: #333;
     -webkit-font-smoothing: antialiased;
@@ -16,12 +16,13 @@ h1 {
 }
 
 .top-bar {
-    max-width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.15);
     padding: 1rem 2rem;
     position: sticky;
     top: 0;
     z-index: 1000;
-    gap: 1rem;
 }
 
 
@@ -63,6 +64,10 @@ input[type="file"] {
     margin: 0;
     font-size: 1rem;
     cursor: pointer;
+    background-color: #fff6ff;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 0.5em;
 }
 
 
@@ -81,7 +86,7 @@ table {
 .table-scroll {
     overflow-x: auto;
     width: 100%;
-    margin: 1rem 0 2rem;
+    margin-top: 1rem;
 }
 
 th, td {
